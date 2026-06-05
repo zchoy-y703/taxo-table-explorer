@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSV Analysis Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Client-Side TSV Analysis Tool</h1>
+            <p>Upload your data and metadata to generate descriptive statistics and boxplots.</p>
+        </header>
+
+        <section class="card step-1">
+            <h2>Step 1: Upload Files</h2>
+            <div class="file-inputs">
+                <div class="input-group">
+                    <label for="dataFile">Data File (.tsv):</label>
+                    <input type="file" id="dataFile" accept=".tsv,.txt">
+                    <small>
+                        <div id="formatToggle">
+                            <input type="radio" id="formatA" name="dataFormat" value="sample-row" checked>
+                            <label for="formatA">clr, alpha: sample as row, feature as column</label><br>
+                            <input type="radio" id="formatB" name="dataFormat" value="feature-row">
+                            <label for="formatB">rel, raw: features as rows, samples as columns</label>
+                        </div>
+                    </small>
+                </div>
+                <div class="input-group">
+                    <label for="metaFile">Metadata File (.tsv):</label>
+                    <input type="file" id="metaFile" accept=".tsv,.txt">
+                    <small>Must contain a 'sample-id' column.</small>
+                </div>
+                
+            </div>
+            <div id="uploadStatus" class="status-message"></div>
+        </section>
+
+        <section class="card step-2">
+            <h2>Step 2: Configuration</h2>
+            <div class="config-inputs">
+                <div class="input-group">
+                    <label for="groupingVar">Grouping Variable (from Metadata):</label>
+                    <select id="groupingVar" disabled>
+                        <option value="">-- Upload metadata first --</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="featureVar">Feature Selection (from Data):</label>
+                    <select id="featureVar" disabled>
+                        <option value="">-- Upload data first --</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="card step-3">
+            <h2>Step 3: Generate Results</h2>
+            <div class="button-group">
+                <button id="generateBtn" disabled>Generate Analysis</button>
+                <div id="validationWarning" class="warning-message hidden"></div>
+                <button id="clearBtn" class="secondary-btn">Clear All</button>
+            </div>
+        </section>
+
+        <section class="card step-4 hidden" id="resultsSection">
+            <h2>Step 4: Results</h2>
+            
+            <div class="stats-container">
+                <h3>Descriptive Statistics</h3>
+                <table id="statsTable">
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th>Count</th>
+                            <th>Min</th>
+                            <th>Max</th>
+                            <th>Mean</th>
+                            <th>Median</th>
+                            <th>Std Dev</th>
+                            <th>IQR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="plot-container">
+                <h3>Boxplot</h3>
+                <div id="boxplotDiv"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
