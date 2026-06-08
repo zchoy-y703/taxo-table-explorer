@@ -20,22 +20,69 @@ document.addEventListener('DOMContentLoaded', () => {
     let featureColName = '';
 
     // File Upload Listeners
-    dataFileInput.addEventListener('change', (e) => handleFileUpload(e, 'data'));
-    metaFileInput.addEventListener('change', (e) => handleFileUpload(e, 'meta'));
+    dataFileInput.addEventListener('change', (e) => handleFileUpload(e));
+    metaFileInput.addEventListener('change', (e) => handleMetaUpload(e));
     clearBtn.addEventListener('click', resetApplication);
     formatToggle.addEventListener('change', () => {
         // Only re-process if a file is already loaded
         if (dataFileInput.files.length > 0) {
             // Re-trigger the file parsing logic
-            handleFileUpload({ target: { files: [dataFileInput.files[0]] } }, 'data');
+            handleFileUpload({ target: { files: [dataFileInput.files[0]] } });
+        }
+        if (metaFileInput.files.length > 0) {
+            // Re-trigger the file parsing logic
+            handleMetaUpload({ target: { files: [metaFileInput.files[0]] } });
         }
     });
 
-    /**
-     * Refactored handleFileUpload to be cleaner
-     * (Ensure this function uses the currently selected radio value)
-     */
-    function handleFileUpload(event, type) {
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        const isFeaturePerRow = document.querySelector('input[name="dataFormat"]:checked').value === 'feature-row';
+
+        Papa.parse(file, {
+            header: !isFeaturePerRow, // Use headers only if samples are rows
+            delimiter: "\t",
+            skipEmptyLines: true,
+            complete: function(results) {
+                let data = results.data;
+
+                if (isFeaturePerRow) {
+                    // 1. Identify headers from the first row (the one we are about to skip)
+                    const rawData = data.slice(1);
+
+                    const headers = rawData[0]; 
+                    const sampleNames = headers.slice(1); // Skip the feature name column
+                    
+                    // 2. Skip the first row and map the rest
+                    
+                    parsedData = rawData.map(row => {
+                        let obj = { "feature-name": row[0] };
+                        
+                        // 3. Loop through sample names and assign values from the current row
+                        sampleNames.forEach((sampleId, index) => {
+                            // index + 1 because column 0 is the feature name
+                            obj[sampleId] = row[index + 1]; 
+                        });
+                        
+                        return obj;
+                    });
+                } else {
+                    // Logic for: Samples as rows, Features as columns
+                    // Standard header-based parsing followed by transposition
+                    parsedData = transposeData(data);
+                }
+                    
+                dataHeaders = Object.keys(parsedData[0]);
+                featureColName = dataHeaders[0]; 
+                populateFeatureDropdown();
+
+                checkReadyState();
+            }
+        });
+    }
+
+    function handleMetaUpload(event) {
         const file = event.target.files[0];
         const isFeaturePerRow = document.querySelector('input[name="dataFormat"]:checked').value === 'feature-row';
 
@@ -44,18 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
             delimiter: "\t",
             skipEmptyLines: true,
             complete: function(results) {
-                if (type === 'data') {
-                    let data = results.data;
-                    // If switching to "Sample as Row", transpose the data
-                    parsedData = isFeaturePerRow ? data : transposeData(data);
-                    dataHeaders = Object.keys(parsedData[0]);
-                    featureColName = dataHeaders[0]; 
-                    
-                    populateFeatureDropdown();
-                } else if (type === 'meta') {
-                    parsedMeta = results.data;
-                    processMetadata(results.meta.fields);
-                }
+                parsedMeta = results.data;
+                processMetadata(results.meta.fields);
                 checkReadyState();
             }
         });
