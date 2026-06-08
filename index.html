@@ -19,6 +19,11 @@
             <h2>Step 1: Upload Files</h2>
             <div class="file-inputs">
                 <div class="input-group">
+                    <label for="metaFile">Metadata File (.tsv):</label>
+                    <input type="file" id="metaFile" accept=".tsv,.txt">
+                    <small>Must contain a 'sample-id' column.</small>
+                </div>
+                <div class="input-group">
                     <label for="dataFile">Data File (.tsv):</label>
                     <input type="file" id="dataFile" accept=".tsv,.txt">
                     <small>
@@ -30,12 +35,6 @@
                         </div>
                     </small>
                 </div>
-                <div class="input-group">
-                    <label for="metaFile">Metadata File (.tsv):</label>
-                    <input type="file" id="metaFile" accept=".tsv,.txt">
-                    <small>Must contain a 'sample-id' column.</small>
-                </div>
-                
             </div>
             <div id="uploadStatus" class="status-message"></div>
         </section>
