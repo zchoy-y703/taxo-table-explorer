@@ -114,13 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateFeatureDropdown() {
         featureVarSelect.innerHTML = '';
-        parsedData.forEach((row, index) => {
+        
+        // Create an array of features with their indices to maintain mapping after sort
+        const features = parsedData.map((row, index) => ({
+            name: row[featureColName],
+            index: index
+        }));
+
+        // Sort alphabetically by name
+        features.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Populate the dropdown
+        features.forEach(feature => {
             const option = document.createElement('option');
-            // Store index to easily retrieve the row later
-            option.value = index; 
-            option.textContent = row[featureColName];
+            option.value = feature.index; // Still points to original index
+            option.textContent = feature.name;
             featureVarSelect.appendChild(option);
         });
+        
         featureVarSelect.disabled = false;
     }
 
